@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anusha's App</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Times New Roman', serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #ffb3d9 0%, #e6ccff 50%, #b3d9ff 100%);
+            background-attachment: fixed;
+            color: #333333;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .floating-hearts {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .heart {
+            position: absolute;
+            font-size: 20px;
+            animation: float 6s infinite linear;
+            opacity: 0.3;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.7;
+            }
+            90% {
+                opacity: 0.7;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 25px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            position: relative;
+            z-index: 10;
+            border: 3px solid rgba(255, 182, 193, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #E6E6FA;
+            margin-bottom: 30px;
+            font-size: 36px;
+            font-weight: bold;
+            font-family: 'Arial', sans-serif;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(45deg, #ff9a9e, #fecfef);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            transform: translateY(0);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-number {
+            font-size: 28px;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #fff;
+            margin-top: 5px;
+        }
+
+        .progress-container {
+            margin-bottom: 25px;
+            background: rgba(255,255,255,0.8);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 25px;
+            background: linear-gradient(90deg, #ff9a9e, #fad0c4);
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+            margin-top: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4facfe, #00f2fe);
+            width: 0%;
+            transition: width 0.5s ease;
+            border-radius: 15px;
+            position: relative;
+        }
+
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+            z-index: 1;
+        }
+
+        .input-section {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            flex: 1;
+            min-width: 250px;
+        }
+
+        #taskInput {
+            flex: 1;
+            padding: 15px;
+            border: 3px solid #ff9a9e;
+            border-radius: 25px;
+            font-size: 16px;
+            background: linear-gradient(135deg, #fff, #f8f9fa);
+            color: #333333;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        #taskInput:focus {
+            border-color: #ff1493;
+            box-shadow: 0 0 20px rgba(255, 20, 147, 0.3);
+            transform: scale(1.02);
+        }
+
+        #taskInput::placeholder {
+            color: #999;
+        }
+
+        .category-select {
+            padding: 15px;
+            border: 3px solid #ff9a9e;
+            border-radius: 25px;
+            background: linear-gradient(135deg, #fff, #f8f9fa);
+            color: #333;
+            outline: none;
+            min-width: 120px;
+        }
+
+        #addTaskBtn {
+            padding: 15px 30px;
+            background: linear-gradient(45deg, #ff9a9e, #fecfef);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        #addTaskBtn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            background: linear-gradient(45deg, #ff6b9d, #ffa8d8);
+        }
+
+        .filter-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-tab {
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.7);
+            border: 2px solid #ff9a9e;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .filter-tab.active {
+            background: linear-gradient(45deg, #ff9a9e, #fecfef);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .task-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 20px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, #e6e6fa, #f0e6ff);
+            color: #333;
+            transition: all 0.3s ease;
+            transform: translateX(0);
+            border-left: 5px solid #9370db;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .task-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+
+        .task-item.completed {
+            background: linear-gradient(135deg, #4CAF50, #81C784);
+            color: white;
+            border-left-color: #2E7D32;
+            animation: completePulse 0.6s ease;
+        }
+
+        @keyframes completePulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .task-category {
+            background: rgba(255,255,255,0.8);
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+
+        .task-checkbox {
+            margin-right: 15px;
+            transform: scale(1.5);
+            cursor: pointer;
+        }
+
+        .task-text {
+            flex: 1;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .task-item.completed .task-text {
+            text-decoration: line-through;
+            opacity: 0.8;
+        }
+
+        .task-time {
+            font-size: 12px;
+            color: #666;
+            margin-left: 10px;
+        }
+
+        .delete-btn {
+            background: linear-gradient(45deg, #f44336, #ff7043);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            margin-left: 10px;
+        }
+
+        .delete-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(244, 67, 54, 0.4);
+        }
+
+        .no-tasks {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+            margin-top: 40px;
+            font-size: 18px;
+            background: rgba(255,255,255,0.7);
+            padding: 30px;
+            border-radius: 15px;
+        }
+
+        .all-completed {
+            text-align: center;
+            color: #4CAF50;
+            font-size: 28px;
+            font-weight: bold;
+            margin-top: 30px;
+            animation: bounce 2s infinite;
+            background: linear-gradient(135deg, rgba(76, 175, 80, 0.1), rgba(129, 199, 132, 0.1));
+            padding: 30px;
+            border-radius: 20px;
+            border: 3px solid #4CAF50;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-10px);
+            }
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+
+        .confetti {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .confetti-piece {
+            position: absolute;
+            background: #ff1493;
+            animation: confettiFall 3s linear infinite;
+        }
+
+        @keyframes confettiFall {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(45deg, #ff9a9e, #fecfef);
+            border: none;
+            padding: 10px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            transform: rotate(180deg);
+        }
+
+        .sound-toggle {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background: linear-gradient(45deg, #4facfe, #00f2fe);
+            border: none;
+            padding: 10px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+            z-index: 1000;
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .motivational-quote {
+            text-align: center;
+            font-style: italic;
+            color: #666;
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(255,255,255,0.6);
+            border-radius: 15px;
+            border-left: 4px solid #ff1493;
+        }
+
+        @media (max-width: 600px) {
+            .input-section {
+                flex-direction: column;
+            }
+            
+            .input-group {
+                min-width: 100%;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            .stats-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="floating-hearts" id="floatingHearts"></div>
+    
+    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Theme">🌙</button>
+    <button class="sound-toggle" onclick="toggleSound()" title="Toggle Sound" id="soundBtn">🔊</button>
+    
+    <div class="container">
+        <h1>Anusha's App</h1>
+        
+        <div class="stats-container">
+            <div class="stat-card">
+                <div class="stat-number" id="totalTasks">0</div>
+                <div class="stat-label">Total Tasks</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="completedTasks">0</div>
+                <div class="stat-label">Completed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="pendingTasks">0</div>
+                <div class="stat-label">Pending</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="completionRate">0%</div>
+                <div class="stat-label">Success Rate</div>
+            </div>
+        </div>
+        
+        <div class="progress-container">
+            <div>📈 Daily Progress</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+                <div class="progress-text" id="progressText">0%</div>
+            </div>
+        </div>
+        
+        <div class="motivational-quote" id="motivationalQuote">
+            "The journey of a thousand miles begins with one step!" 🌟
+        </div>
+        
+        <div class="input-section">
+            <div class="input-group">
+                <input type="text" id="taskInput" placeholder="Enter your amazing task! ✨" maxlength="100">
+                <select class="category-select" id="categorySelect">
+                    <option value="personal">🏠 Personal</option>
+                    <option value="work">💼 Work</option>
+                    <option value="health">💪 Health</option>
+                    <option value="learning">📚 Learning</option>
+                    <option value="fun">🎉 Fun</option>
+                </select>
+            </div>
+            <button id="addTaskBtn">✨ Add Magic Task</button>
+        </div>
+        
+        <div class="filter-tabs">
+            <div class="filter-tab active" data-filter="all">All Tasks</div>
+            <div class="filter-tab" data-filter="pending">Pending</div>
+            <div class="filter-tab" data-filter="completed">Completed</div>
+            <div class="filter-tab" data-filter="personal">Personal</div>
+            <div class="filter-tab" data-filter="work">Work</div>
+            <div class="filter-tab" data-filter="health">Health</div>
+        </div>
+        
+        <div id="tasksList"></div>
+        <div id="noTasks" class="no-tasks" style="display: none;">
+            🌸 No tasks yet! Add your first magical task above! 🌸
+        </div>
+        <div id="allCompleted" class="all-completed" style="display: none;">
+            🎀 WOW! All tasks completed! You're amazing! 👍✨
+        </div>
+    </div>
+    
+    <div class="confetti" id="confetti"></div>
+
+    <script>
+        class MagicalDailyTaskApp {
+            constructor() {
+                this.tasks = JSON.parse(localStorage.getItem('magicalTasks')) || [];
+                this.taskIdCounter = parseInt(localStorage.getItem('taskCounter')) || 0;
+                this.currentFilter = 'all';
+                this.soundEnabled = true;
+                this.quotes = [
+                    "The journey of a thousand miles begins with one step! 🌟",
+                    "You are capable of amazing things! 💫",
+                    "Every task completed is a victory! 🏆",
+                    "Progress, not perfection! 🌈", 
+                    "You've got this! Keep going! 💪",
+                    "Small steps lead to big achievements! ✨",
+                    "Believe in yourself and all that you are! 🦋"
+                ];
+                this.init();
+            }
+
+            init() {
+                this.taskInput = document.getElementById('taskInput');
+                this.addTaskBtn = document.getElementById('addTaskBtn');
+                this.tasksList = document.getElementById('tasksList');
+                this.noTasks = document.getElementById('noTasks');
+                this.categorySelect = document.getElementById('categorySelect');
+
+                this.addTaskBtn.addEventListener('click', () => this.addTask());
+                this.taskInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        this.addTask();
+                    }
+                });
+
+                // Filter tabs
+                document.querySelectorAll('.filter-tab').forEach(tab => {
+                    tab.addEventListener('click', (e) => {
+                        this.setFilter(e.target.dataset.filter);
+                    });
+                });
+
+                this.startFloatingHearts();
+                this.updateMotivationalQuote();
+                this.updateDisplay();
+                
+                // Update quote every 30 seconds
+                setInterval(() => this.updateMotivationalQuote(), 30000);
+            }
+
+            addTask() {
+                const taskText = this.taskInput.value.trim();
+                const category = this.categorySelect.value;
+                
+                if (taskText) {
+                    const task = {
+                        id: this.taskIdCounter++,
+                        text: taskText,
+                        category: category,
+                        completed: false,
+                        createdAt: new Date().toLocaleString()
+                    };
+                    this.tasks.push(task);
+                    this.taskInput.value = '';
+                    this.playSound('add');
+                    this.saveToLocalStorage();
+                    this.updateDisplay();
+                } else {
+                    this.showNotification('Please enter a magical task! ✨');
+                }
+            }
+
+            deleteTask(taskId) {
+                this.tasks = this.tasks.filter(task => task.id !== taskId);
+                this.playSound('delete');
+                this.saveToLocalStorage();
+                this.updateDisplay();
+            }
+
+            toggleTask(taskId) {
+                const task = this.tasks.find(task => task.id === taskId);
+                if (task) {
+                    task.completed = !task.completed;
+                    if (task.completed) {
+                        this.playSound('complete');
+                        this.createConfetti();
+                    }
+                    this.saveToLocalStorage();
+                    this.updateDisplay();
+                }
+            }
+
+            setFilter(filter) {
+                this.currentFilter = filter;
+                document.querySelectorAll('.filter-tab').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+                document.querySelector(`[data-filter="${filter}"]`).classList.add('active');
+                this.updateDisplay();
+            }
+
+            getFilteredTasks() {
+                switch(this.currentFilter) {
+                    case 'completed':
+                        return this.tasks.filter(task => task.completed);
+                    case 'pending':
+                        return this.tasks.filter(task => !task.completed);
+                    case 'all':
+                        return this.tasks;
+                    default:
+                        return this.tasks.filter(task => task.category === this.currentFilter);
+                }
+            }
+
+            updateStats() {
+                const total = this.tasks.length;
+                const completed = this.tasks.filter(task => task.completed).length;
+                const pending = total - completed;
+                const rate = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+                document.getElementById('totalTasks').textContent = total;
+                document.getElementById('completedTasks').textContent = completed;
+                document.getElementById('pendingTasks').textContent = pending;
+                document.getElementById('completionRate').textContent = rate + '%';
+
+                // Update progress bar
+                const progressFill = document.getElementById('progressFill');
+                const progressText = document.getElementById('progressText');
+                progressFill.style.width = rate + '%';
+                progressText.textContent = rate + '%';
+            }
+
+            updateDisplay() {
+                const filteredTasks = this.getFilteredTasks();
+                const allCompletedDiv = document.getElementById('allCompleted');
+                
+                this.updateStats();
+                
+                if (filteredTasks.length === 0) {
+                    this.tasksList.innerHTML = '';
+                    this.noTasks.style.display = 'block';
+                    allCompletedDiv.style.display = 'none';
+                    return;
+                }
+
+                this.noTasks.style.display = 'none';
+                
+                // Check if all tasks are completed
+                const allCompleted = this.tasks.length > 0 && this.tasks.every(task => task.completed);
+                allCompletedDiv.style.display = allCompleted ? 'block' : 'none';
+                
+                if (allCompleted) {
+                    this.createMegaConfetti();
+                }
+                
+                const categoryEmojis = {
+                    personal: '🏠',
+                    work: '💼', 
+                    health: '💪',
+                    learning: '📚',
+                    fun: '🎉'
+                };
+                
+                this.tasksList.innerHTML = filteredTasks.map(task => `
+                    <div class="task-item ${task.completed ? 'completed' : ''}" data-category="${task.category}">
+                        <input type="checkbox" class="task-checkbox" 
+                               ${task.completed ? 'checked' : ''} 
+                               onchange="app.toggleTask(${task.id})">
+                        <span class="task-category">${categoryEmojis[task.category]} ${task.category}</span>
+                        <span class="task-text">${task.text}</span>
+                        <span class="task-time">${task.createdAt}</span>
+                        <button class="delete-btn" onclick="app.deleteTask(${task.id})">🗑️ Delete</button>
+                    </div>
+                `).join('');
+            }
+
+            startFloatingHearts() {
+                const heartsContainer = document.getElementById('floatingHearts');
+                const hearts = ['💖', '💕', '✨', '🌟', '💫', '🦋'];
+                
+                setInterval(() => {
+                    const heart = document.createElement('div');
+                    heart.className = 'heart';
+                    heart.textContent = hearts[Math.floor(Math.random() * hearts.length)];
+                    heart.style.left = Math.random() * 100 + '%';
+                    heart.style.animationDuration = (Math.random() * 3 + 3) + 's';
+                    heartsContainer.appendChild(heart);
+                    
+                    setTimeout(() => {
+                        heart.remove();
+                    }, 6000);
+                }, 2000);
+            }
+
+            updateMotivationalQuote() {
+                const quote = this.quotes[Math.floor(Math.random() * this.quotes.length)];
+                document.getElementById('motivationalQuote').textContent = quote;
+            }
+
+            createConfetti() {
+                const confetti = document.getElementById('confetti');
+                const colors = ['#ff1493', '#00f2fe', '#4facfe', '#fecfef', '#ff9a9e'];
+                
+                for (let i = 0; i < 50; i++) {
+                    const piece = document.createElement('div');
+                    piece.className = 'confetti-piece';
+                    piece.style.left = Math.random() * 100 + '%';
+                    piece.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    piece.style.width = piece.style.height = Math.random() * 10 + 5 + 'px';
+                    piece.style.animationDelay = Math.random() * 2 + 's';
+                    confetti.appendChild(piece);
+                    
+                    setTimeout(() => {
+                        piece.remove();
+                    }, 3000);
+                }
+            }
+
+            createMegaConfetti() {
+                const confetti = document.getElementById('confetti');
+                const colors = ['#ff1493', '#00f2fe', '#4facfe', '#fecfef', '#ff9a9e', '#4CAF50', '#FFD700'];
+                
+                for (let i = 0; i < 100; i++) {
+                    const piece = document.createElement('div');
+                    piece.className = 'confetti-piece';
+                    piece.style.left = Math.random() * 100 + '%';
+                    piece.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    piece.style.width = piece.style.height = Math.random() * 15 + 10 + 'px';
+                    piece.style.animationDelay = Math.random() * 3 + 's';
+                    confetti.appendChild(piece);
+                    
+                    setTimeout(() => {
+                        piece.remove();
+                    }, 5000);
+                }
+            }
+
+            playSound(type) {
+                if (!this.soundEnabled) return;
+                
+                // Create audio context for sound effects
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                switch(type) {
+                    case 'add':
+                        oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+                        break;
+                    case 'complete':
+                        oscillator.frequency.setValueAtTime(1000, audioContext.currentTime);
+                        break;
+                    case 'delete':
+                        oscillator.frequency.setValueAtTime(400, audioContext.currentTime);
+                        break;
+                }
+                
+                gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.3);
+            }
+
+            showNotification(message) {
+                alert(message);
+            }
+
+            saveToLocalStorage() {
+                localStorage.setItem('magicalTasks', JSON.stringify(this.tasks));
+                localStorage.setItem('taskCounter', this.taskIdCounter.toString());
+            }
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('dark-theme');
+        }
+
+        function toggleSound() {
+            app.soundEnabled = !app.soundEnabled;
+            const btn = document.getElementById('soundBtn');
+            btn.textContent = app.soundEnabled ? '🔊' : '🔇';
+        }
+
+        // Initialize the magical app when the page loads
+        const app = new MagicalDailyTaskApp();
+    </script>
+</body>
+</html>
